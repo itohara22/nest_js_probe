@@ -4,6 +4,6 @@ import { Controller, Get } from '@nestjs/common';
 export class CatsController {
   @Get()
   findAll(): string {
-    return 'All cats';
+    return 'All cats from module';
   }
 }
