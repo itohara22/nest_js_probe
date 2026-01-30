@@ -13,8 +13,7 @@ export class CatsController {
   }
 
   @Post()
-  createCat(@Body() cat: CreateCatDto): string {
-    console.log(cat);
-    return 'created';
+  createCat(@Body() cat: CreateCatDto) {
+    this.catsService.create(cat);
   }
 }
