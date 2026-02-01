@@ -1,98 +1,95 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend Design Overview – Expense Management System
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 1. Project Overview
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This project is a backend system for managing organization-level expenses. It supports multiple organizations (tenants), role-based user access, expense tracking, and expense splitting for shared costs. The system is backend-only and focuses on correctness, data isolation, and scalability.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 2. Core Entities
 
-## Project setup
+### User
 
-```bash
-$ npm install
-```
+* Represents a real person who can log in to the system
+* A user can belong to multiple organizations
+* A user by itself does not own business data
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+### Organization
 
-# watch mode
-$ npm run start:dev
+* Represents a company, team, or group using the system
+* All business data (expenses, categories, reports) belongs to an organization
+* Acts as the tenant boundary for data isolation
 
-# production mode
-$ npm run start:prod
-```
+---
 
-## Run tests
+### UserOrganization (Membership)
 
-```bash
-# unit tests
-$ npm run test
+* Represents the relationship between a user and an organization
+* Defines the user’s role within that organization
+* Enables a many-to-many relationship between users and organizations
 
-# e2e tests
-$ npm run test:e2e
+Roles are scoped to organizations, not users globally.
 
-# test coverage
-$ npm run test:cov
-```
+---
 
-## Deployment
+### Expense
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+* Represents a single spending event within an organization
+* Stores the total amount, description, category, and creation time
+* Belongs to exactly one organization
+* Does not define who is responsible for payment
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+---
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+### ExpenseSplit
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+* Represents how an expense is divided among users
+* Each split assigns responsibility for part of an expense to a user
+* Belongs to exactly one expense
+* Cannot exist without an associated expense
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## 3. Relationships
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+* A user can belong to multiple organizations
+* An organization can have multiple users
+* A user has a specific role per organization
+* An organization can have multiple expenses
+* An expense belongs to one organization
+* An expense can have multiple expense splits
+* Each expense split is associated with one user
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 4. Invariants (Rules That Must Always Hold)
 
-## Stay in touch
+* Every expense must belong to exactly one organization
+* Users can only access data belonging to their organizations
+* The sum of all expense splits must equal the total expense amount
+* A user’s permissions are determined by their role in the organization
+* Expense splits cannot exist without a valid expense
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
-## License
+## 5. Authorization Model (High Level)
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+* OWNER: full control over organization, users, and expenses
+* ADMIN: manage expenses and view reports
+* MEMBER: view expenses and reports
+
+Authorization decisions are always scoped to the organization.
+
+---
+
+## 6. Out of Scope (Initial Version)
+
+* Frontend UI
+* Payment processing
+* Currency conversion
+* Audit logs
+* Notifications
+
+These may be added in future iterations but are intentionally excluded from the initial scope.
