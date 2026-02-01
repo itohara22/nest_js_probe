@@ -39,7 +39,7 @@ Roles are scoped to organizations, not users globally.
 * Represents a single spending event within an organization
 * Stores the total amount, description, category, and creation time
 * Belongs to exactly one organization
-* Does not define who is responsible for payment
+* Define who is responsible for payment
 
 ---
 
@@ -59,6 +59,7 @@ Roles are scoped to organizations, not users globally.
 * A user has a specific role per organization
 * An organization can have multiple expenses
 * An expense belongs to one organization
+* An expense have one creator (user)
 * An expense can have multiple expense splits
 * Each expense split is associated with one user
 
@@ -76,11 +77,23 @@ Roles are scoped to organizations, not users globally.
 
 ## 5. Authorization Model (High Level)
 
-* OWNER: full control over organization, users, and expenses
-* ADMIN: manage expenses and view reports
-* MEMBER: view expenses and reports
+* OWNER:
+    - Full control over the organization
+    - Manage users and roles
+    - Create, update, and delete any expense
+    - View all expenses and reports
 
-Authorization decisions are always scoped to the organization.
+* ADMIN:
+    - Create expenses
+    - Update and delete any expense within the organization
+    - View all expenses and reports
+
+* MEMBER:
+    - Create expenses
+    - View expenses and reports
+    - Update and delete only expenses they created
+
+* Authorization decisions are always scoped to the organization.
 
 ---
 
