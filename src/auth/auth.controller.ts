@@ -1,23 +1,25 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { AuthUserDto } from './dto_auth/auth_user.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor() {}
+  constructor(private authService: AuthService) {}
 
   @Post('login')
-  login(): string {
-    return 'login';
+  login( @Body() user: AuthUserDto): string {
+    return this.authService.authenticateUser(user);
   }
 
   // @Get() // this are changing servers state so cannot be get
   @Post('logout')
   logout(): string {
-    return 'logout';
+    return this.authService.logoutUser();
   }
 
   // @Get() // this are changing servers state so cannot be get
   @Post('refresh')
   refreshToken(): string {
-    return 'refreshed';
+    return this.authService.refreshToken();
   }
 }
