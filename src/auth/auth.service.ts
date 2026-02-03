@@ -3,15 +3,23 @@ import { AuthUserDto } from './dto_auth/auth_user.dto';
 import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt'
 import * as crypto from "node:crypto"
+import { LoginResponseObject } from "./auth.types"
+
 
 @Injectable() // to tell nest to manage it by itself ie inversion of control
 export class AuthService {
 
       constructor(private jwtService: JwtService){}
 
-      fetchUser(username: string): AuthUserDto {
-            const user = new AuthUserDto(); // will lookup user from db using username
-            user.username = username;
+      private users = [
+            {userId:1,username:"ito",password:"hashed"},
+            {userId:2,username:"nina",password:"hashed"},
+            {userId:3,username:"kunio",password:"hashed"},
+      ]
+
+      async fetchUser(username: string): Promise<AuthUserDto | undefined >{
+            // const user = new AuthUserDto(); // will lookup user from db using username
+            const user = this.users.find(v => v.username === username)
             return user;
       }
 
@@ -31,15 +39,20 @@ export class AuthService {
              return refreshToken;
       }
 
-      refreshToken():string {
-            return "refresh";
+      async refreshToken(refreshTokenFromClient: string): Promise<LoginResponseObject> {
+            // look up refreshTokenFromClient in db in user table 
+            // we will use this user to create new jwt access token
+            const userId = {userId:1}
+            const  jwt = await this.createJwt(userId);
+            return { token: jwt, userId:1, username: "username"};
       }
 
-      removeToken(): string{
-            return "removes";
+      async removeToken(refreshTokenFromClient: string): Promise<boolean>{
+            // delete this token in user table
+            return true;
       }
 
-      async authenticateUser(user: AuthUserDto ): Promise<{token:string; userId:number; username:string}> {
+      async authenticateUser(user: AuthUserDto ): Promise<LoginResponseObject> {
           const userFromDb = this.fetchUser(user.username)
           const isCorrect =  await this.verifyPassword(userFromDb.password,user.password)
           if (isCorrect) {
@@ -52,8 +65,10 @@ export class AuthService {
           throw new BadRequestException("Invalid username or passoword")
       }
 
-      logoutUser():string {
-            return this.removeToken();
+      async logoutUser(): Promise<string> {
+            const isDeleted = await this.removeToken("sadas");
+            // check isDeleted and return appropriate response
+            return "logout"
       }
 
 }
