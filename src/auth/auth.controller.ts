@@ -7,8 +7,8 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  login( @Body() user: AuthUserDto): string {
-    return this.authService.authenticateUser(user);
+  async login( @Body() user: AuthUserDto): Promise<string> {
+    return  await this.authService.authenticateUser(user);
   }
 
   // @Get() // this are changing servers state so cannot be get
