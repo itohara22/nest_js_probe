@@ -53,14 +53,14 @@ export class AuthService {
       }
 
       async authenticateUser(user: AuthUserDto ): Promise<LoginResponseObject> {
-          const userFromDb = this.fetchUser(user.username)
-          const isCorrect =  await this.verifyPassword(userFromDb.password,user.password)
+          const userFromDb = await this.fetchUser(user.username)
+          const isCorrect =  await this.verifyPassword("userFromDb.password",user.password)
           if (isCorrect) {
               const userId = {userId:1}
               const  jwt = await this.createJwt(userId);
               const refreshToken = this.createRefreshToken()
               // save refreshToken in db for user
-              return {token: jwt, userId:1, username: userFromDb.username};
+              return {token: jwt, userId:1, username: userFromDb?.username || ""};
           }
           throw new BadRequestException("Invalid username or passoword")
       }
