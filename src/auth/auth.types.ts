@@ -1,1 +1,5 @@
-export type LoginResponseObject = {token:string; userId:number; username:string}
+export type LoginResponseObject = {
+  token: string;
+  userId: number;
+  username: string;
+};

@@ -1,15 +1,15 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthUserDto } from './dto_auth/auth_user.dto';
-import { LoginResponseObject} from './auth.types'
- 
+import { LoginResponseObject } from './auth.types';
+
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  async login( @Body() user: AuthUserDto): Promise<LoginResponseObject> {
-    return  await this.authService.authenticateUser(user);
+  async login(@Body() user: AuthUserDto): Promise<LoginResponseObject> {
+    return await this.authService.authenticateUser(user);
   }
 
   // @Get() // this are changing servers state so cannot be get
@@ -21,6 +21,6 @@ export class AuthController {
   // @Get() // this are changing servers state so cannot be get
   @Post('refresh')
   async refreshToken(): Promise<LoginResponseObject> {
-    return await this.authService.refreshToken("refreshTokenFromClient");
+    return await this.authService.refreshToken('refreshTokenFromClient');
   }
 }
