@@ -4,9 +4,11 @@ import { AppService } from './app.service';
 import { CatsModule } from './cats/cats.module';
 import { AuthModule } from './auth/auth.module';
 import { OrgModule } from './organization/org.module';
+import { UserModule } from './user/user.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
-  imports: [CatsModule, AuthModule, OrgModule],
+  imports: [CatsModule, AuthModule, OrgModule, UserModule, DatabaseModule],
   controllers: [AppController],
   providers: [AppService],
 })

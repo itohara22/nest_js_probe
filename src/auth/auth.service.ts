@@ -1,23 +1,19 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { AuthUserDto } from './dto_auth/auth_user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'node:crypto';
 import { LoginResponseObject } from './auth.types';
+import type { Database as SqliteDB } from 'better-sqlite3';
 
 @Injectable() // to tell nest to manage it by itself ie inversion of control
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
-
-  private users = [
-    { userId: 1, username: 'ito', password: 'hashed' },
-    { userId: 2, username: 'nina', password: 'hashed' },
-    { userId: 3, username: 'kunio', password: 'hashed' },
-  ];
+  constructor(private jwtService: JwtService, @Inject("DATABASE") private db: SqliteDB) {}
 
   async fetchUser(username: string): Promise<AuthUserDto | undefined> {
     // const user = new AuthUserDto(); // will lookup user from db using username
-    const user = this.users.find((v) => v.username === username);
+    const qr = this.db.prepare("SELECT * FROM user WHERE username = ?")
+    const user = qr.get(username) as AuthUserDto
     return user;
   }
 
@@ -60,8 +56,11 @@ export class AuthService {
 
   async authenticateUser(user: AuthUserDto): Promise<LoginResponseObject> {
     const userFromDb = await this.fetchUser(user.username);
+    if(!userFromDb){
+        throw new BadRequestException('Invalid username or passoword');
+    }
     const isCorrect = await this.verifyPassword(
-      'userFromDb.password',
+      userFromDb.password,
       user.password,
     );
     if (isCorrect) {
